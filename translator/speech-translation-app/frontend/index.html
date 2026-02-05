@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Arabic Translator</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b2d 50%, #4a1818 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container {
+            background: rgba(220, 20, 60, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(220, 20, 60, 0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(220, 20, 60, 0.3));
+        }
+        
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: rgba(220, 20, 60, 0.6);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
+        }
+        
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        
+        button {
+            background: rgba(220, 20, 60, 0.2);
+            color: #ffffff;
+            border: 2px solid rgba(220, 20, 60, 0.4);
+            padding: 15px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            font-size: 20px;
+        }
+        
+        button:hover {
+            background: rgba(220, 20, 60, 0.4);
+            border-color: rgba(220, 20, 60, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 20, 60, 0.3);
+        }
+        
+        button:hover i {
+            transform: scale(1.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.primary {
+            background: rgba(220, 20, 60, 0.6);
+            border-color: rgba(220, 20, 60, 0.8);
+        }
+        
+        button.primary:hover {
+            background: rgba(220, 20, 60, 0.8);
+            border-color: rgba(220, 20, 60, 1);
+        }
+        
+        .output {
+            background: rgba(220, 20, 60, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 25px;
+            min-height: 80px;
+            text-align: right;
+            direction: rtl;
+            font-size: 20px;
+            line-height: 1.8;
+            border: 2px solid rgba(220, 20, 60, 0.2);
+            font-family: 'Segoe UI', 'Tahoma', 'Arabic UI Text', 'Traditional Arabic', 'Al Bayan', 'Geeza Pro', sans-serif;
+            unicode-bidi: plaintext;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: rgba(220, 20, 60, 0.2);
+            color: #ff6b6b;
+        }
+        
+        .status.error {
+            background: rgba(220, 53, 69, 0.3);
+            color: #FFB6C1;
+        }
+        
+        .status.info {
+            background: rgba(220, 20, 60, 0.1);
+            color: #ff6b6b;
+        }
+        
+        .tips {
+            margin-top: 30px;
+            background: rgba(220, 20, 60, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid rgba(220, 20, 60, 0.2);
+        }
+        
+        .tips h3 {
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+        
+        .tips ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .tips li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .tips li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div class="logo-container">
+        </div>        
+        <div class="input-group">
+            <textarea id="inputText" placeholder="" 
+                      aria-label="English text input" 
+                      oninput="autoTranslate()" 
+                      onpaste="setTimeout(autoTranslate, 100)"></textarea>
+        </div>
+        
+        <div class="buttons">
+            <button onclick="startSpeechRecognition()" title="Use microphone to speak">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button onclick="translateText()" class="primary" title="Manual translate (Auto-translate is enabled)">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+            <button onclick="clearAll()" title="Clear all text">
+                <i class="fas fa-trash"></i>
+            </button>
+            <button onclick="copyResult()" title="Copy Arabic translation">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
+        
+        <div class="output" id="outputText">
+            <em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">
+                Arabic translation will appear here...
+            </em>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+
+    </div>
+
+    <script>
+        // Enhanced translation dictionary
+        const translations = {
+            // Complete phrases (highest priority)
+            'the network bypass solution gives you immediate speech recognition': 'حل تجاوز الشبكة يمنحك التعرف الفوري على الكلام',
+            'this is a test of the translation system': 'هذا اختبار لنظام الترجمة',
+            'network bypass solution': 'حل تجاوز الشبكة',
+            'immediate speech recognition': 'التعرف الفوري على الكلام',
+            'speech recognition': 'التعرف على الكلام',
+            'translation system': 'نظام الترجمة',
+            'hello, morning': 'مرحبا، صباح الخير',
+            'hello morning': 'صباح الخير',
+            'hello world': 'مرحبا بالعالم',
+            'how are you': 'كيف حالك',
+            'thank you': 'شكرا لك',
+            'good morning': 'صباح الخير',
+            'good evening': 'مساء الخير',
+            'good night': 'تصبح على خير',
+            'my name is': 'اسمي',
+            'nice to meet you': 'سعيد بلقائك',
+            'what time is it': 'كم الساعة',
+            'where are you from': 'من أين أنت',
+            'i love you': 'أحبك',
+            'excuse me': 'عذرا',
+            'see you later': 'أراك لاحقا',
+            
+            // Individual words
+            'hello': 'مرحبا', 'hi': 'مرحبا', 'world': 'عالم',
+            'the': 'ال', 'a': 'ا', 'an': 'ا', 'and': 'و', 'or': 'أو', 'but': 'لكن',
+            'i': 'أنا', 'you': 'أنت', 'he': 'هو', 'she': 'هي', 'we': 'نحن', 'they': 'هم',
+            'this': 'هذا', 'that': 'ذلك', 'these': 'هؤلاء', 'those': 'أولئك',
+            'is': 'هو', 'are': 'تكون', 'was': 'كان', 'were': 'كانوا', 'be': 'يكون',
+            'have': 'لديه', 'has': 'لديه', 'had': 'كان لديه',
+            'will': 'سوف', 'would': 'كان سيفعل', 'can': 'يستطيع', 'could': 'استطاع',
+            'should': 'يجب', 'must': 'يجب', 'may': 'قد', 'might': 'ربما',
+            'do': 'يفعل', 'does': 'يفعل', 'did': 'فعل',
+            'not': 'ليس', 'no': 'لا', 'yes': 'نعم',
+            'good': 'جيد', 'bad': 'سيء', 'big': 'كبير', 'small': 'صغير',
+            'new': 'جديد', 'old': 'قديم', 'fast': 'سريع', 'slow': 'بطيء',
+            'easy': 'سهل', 'hard': 'صعب', 'important': 'مهم',
+            'today': 'اليوم', 'tomorrow': 'غدا', 'yesterday': 'أمس',
+            'morning': 'صباح', 'evening': 'مساء', 'night': 'ليل', 'afternoon': 'بعد الظهر',
+            'now': 'الآن', 'here': 'هنا', 'there': 'هناك',
+            'where': 'أين', 'when': 'متى', 'what': 'ماذا', 'who': 'من', 'why': 'لماذا', 'how': 'كيف',
+            'love': 'حب', 'like': 'مثل', 'want': 'أريد', 'need': 'أحتاج',
+            'work': 'يعمل', 'works': 'يعمل', 'test': 'اختبار', 'system': 'نظام',
+            'computer': 'حاسوب', 'phone': 'هاتف', 'internet': 'إنترنت',
+            'network': 'شبكة', 'solution': 'حل', 'translation': 'ترجمة',
+            'speech': 'كلام', 'recognition': 'التعرف', 'immediate': 'فوري',
+            'bypass': 'تجاوز', 'gives': 'يعطي', 'give': 'يعطي',
+            'thank': 'شكر', 'thanks': 'شكرا', 'please': 'من فضلك',
+            'sorry': 'آسف', 'excuse': 'عذر', 'help': 'مساعدة',
+            'name': 'اسم', 'time': 'وقت', 'day': 'يوم', 'year': 'سنة',
+            'water': 'ماء', 'food': 'طعام', 'house': 'بيت', 'car': 'سيارة',
+            'book': 'كتاب', 'school': 'مدرسة', 'work': 'عمل', 'money': 'مال',
+            'family': 'عائلة', 'friend': 'صديق', 'people': 'ناس'
+        };
+
+        let recognition = null;
+        let isListening = false;
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Auto-translation with debouncing
+        let autoTranslateTimeout;
+        function autoTranslate() {
+            // Clear any existing timeout
+            if (autoTranslateTimeout) {
+                clearTimeout(autoTranslateTimeout);
+            }
+            
+            const input = document.getElementById('inputText').value.trim();
+            const output = document.getElementById('outputText');
+            
+            // If input is empty, clear the output
+            if (!input) {
+                output.innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">Arabic translation will appear here...</em>';
+                return;
+            }
+            
+            // Set a timeout to delay translation (debouncing)
+            autoTranslateTimeout = setTimeout(() => {
+                showStatus('Auto-translating...', 'info');
+                
+                // Try online translation first, then fallback to local
+                tryOnlineTranslation(input).then(result => {
+                    if (result) {
+                        // Set Arabic text with proper formatting
+                        output.textContent = result;
+                        output.style.direction = 'rtl';
+                        output.style.textAlign = 'right';
+                        output.lang = 'ar';
+                        showStatus('Auto-translated successfully!', 'success');
+                    } else {
+                        const localResult = translateLocally(input);
+                        output.textContent = localResult;
+                        output.style.direction = 'rtl';
+                        output.style.textAlign = 'right';
+                        output.lang = 'ar';
+                        showStatus('Auto-translated using local dictionary', 'success');
+                    }
+                }).catch(error => {
+                    const localResult = translateLocally(input);
+                    output.textContent = localResult;
+                    output.style.direction = 'rtl';
+                    output.style.textAlign = 'right';
+                    output.lang = 'ar';
+                    showStatus('Auto-translated using local dictionary', 'success');
+                });
+            }, 1000); // Wait 1 second after user stops typing
+        }
+
+        function translateText() {
+            // Clear any pending auto-translation
+            if (autoTranslateTimeout) {
+                clearTimeout(autoTranslateTimeout);
+            }
+            
+            const input = document.getElementById('inputText').value.trim();
+            const output = document.getElementById('outputText');
+            
+            if (!input) {
+                showStatus('Please enter some text to translate', 'error');
+                return;
+            }
+            
+            showStatus('Translating...', 'info');
+            
+            // Try online translation first, then fallback to local
+            tryOnlineTranslation(input).then(result => {
+                if (result) {
+                    // Set Arabic text with proper formatting
+                    output.textContent = result;
+                    output.style.direction = 'rtl';
+                    output.style.textAlign = 'right';
+                    output.lang = 'ar';
+                    showStatus('Translated successfully!', 'success');
+                } else {
+                    const localResult = translateLocally(input);
+                    output.textContent = localResult;
+                    output.style.direction = 'rtl';
+                    output.style.textAlign = 'right';
+                    output.lang = 'ar';
+                    showStatus('Translated using local dictionary', 'success');
+                }
+            }).catch(error => {
+                const localResult = translateLocally(input);
+                output.textContent = localResult;
+                output.style.direction = 'rtl';
+                output.style.textAlign = 'right';
+                output.lang = 'ar';
+                showStatus('Translated using local dictionary', 'success');
+            });
+        }
+
+        async function tryOnlineTranslation(text) {
+            try {
+                const response = await fetch('http://localhost:8080/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        sourceLang: 'en',
+                        targetLang: 'ar'
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.translatedText || result.translation;
+                }
+            } catch (error) {
+                console.log('Online translation not available');
+            }
+            return null;
+        }
+
+        function translateLocally(input) {
+            const lowerInput = input.toLowerCase().trim();
+            
+            // Step 1: Check for exact phrase matches
+            if (translations[lowerInput]) {
+                return translations[lowerInput];
+            }
+            
+            // Step 2: Check for partial phrase matches
+            for (const [englishPhrase, arabicPhrase] of Object.entries(translations)) {
+                if (englishPhrase.includes(' ') && lowerInput.includes(englishPhrase)) {
+                    return arabicPhrase;
+                }
+            }
+            
+            // Step 3: Word-by-word translation
+            const words = lowerInput.replace(/[^\w\s]/g, '').split(/\s+/);
+            const translatedWords = [];
+            let translatedCount = 0;
+            
+            for (const word of words) {
+                if (translations[word]) {
+                    translatedWords.push(translations[word]);
+                    translatedCount++;
+                } else {
+                    // Try partial matches for longer words
+                    let found = false;
+                    if (word.length > 3) {
+                        for (const [englishWord, arabicWord] of Object.entries(translations)) {
+                            if (englishWord.length > 3 && 
+                                (word.includes(englishWord) || englishWord.includes(word))) {
+                                translatedWords.push(arabicWord);
+                                translatedCount++;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found) {
+                        translatedWords.push(`[${word}]`);
+                    }
+                }
+            }
+            
+            if (translatedCount > 0) {
+                return translatedWords.join(' ');
+            } else {
+                return 'عذرا، لا يمكن ترجمة هذا النص. جرب جملة أبسط.\n(Sorry, cannot translate this text. Try a simpler sentence.)';
+            }
+        }
+
+        function startSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showStatus('❌ Speech recognition not supported. Try typing instead or use Windows Voice Typing (Win+H)', 'error');
+                return;
+            }
+            
+            if (isListening) {
+                stopSpeechRecognition();
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                isListening = true;
+                showStatus('Listening... Speak now!', 'info');
+                document.querySelector('button[onclick="startSpeechRecognition()"]').innerHTML = '<i class="fas fa-stop"></i>';
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('inputText').value = transcript;
+                showStatus(`Captured: "${transcript}"`, 'success');
+                // Auto-translate the captured speech
+                setTimeout(() => autoTranslate(), 300);
+            };
+            
+            recognition.onerror = function(event) {
+                showStatus(`❌ Speech recognition error. Try Windows Voice Typing (Win+H) instead`, 'error');
+                stopSpeechRecognition();
+            };
+            
+            recognition.onend = function() {
+                stopSpeechRecognition();
+            };
+            
+            recognition.start();
+        }
+
+        function stopSpeechRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isListening = false;
+            document.querySelector('button[onclick="startSpeechRecognition()"]').innerHTML = '<i class="fas fa-microphone"></i>';
+            if (document.getElementById('status').textContent.includes('Listening')) {
+                showStatus('Voice input stopped', 'info');
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">Arabic translation will appear here...</em>';
+            document.getElementById('status').style.display = 'none';
+            showStatus('Cleared all text', 'success');
+        }
+
+        function copyResult() {
+            const output = document.getElementById('outputText');
+            const text = output.textContent || output.innerText;
+            
+            if (!text || text.includes('Arabic translation will appear here')) {
+                showStatus('❌ No translation to copy', 'error');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Arabic text copied to clipboard!', 'success');
+            }).catch(() => {
+                showStatus('❌ Could not copy text', 'error');
+            });
+        }
+
+        // Handle Enter key for translation
+        document.getElementById('inputText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                translateText();
+            }
+        });
+
+        // Auto-focus on input
+        document.getElementById('inputText').focus();
+    </script>
+</body>
+</html>

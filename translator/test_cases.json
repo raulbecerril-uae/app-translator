@@ -1,0 +1,16 @@
+{
+  "test_sentences": [
+    {
+      "english": "The Network Bypass Solution gives you immediate speech recognition",
+      "expected_improvement": "Should translate 'Network Bypass Solution', 'gives', 'immediate', 'speech recognition' properly"
+    },
+    {
+      "english": "This is a test of the translation system", 
+      "expected_improvement": "Should translate 'This', 'test', 'translation system' properly"
+    },
+    {
+      "english": "hello world",
+      "expected_improvement": "Should translate both words"
+    }
+  ]
+}

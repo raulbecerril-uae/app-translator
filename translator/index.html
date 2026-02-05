@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Arabic Translator</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b2d 50%, #4a1818 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .container {
+            background: rgba(220, 20, 60, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(220, 20, 60, 0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(220, 20, 60, 0.3));
+        }
+        
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        .equalizer-bars {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            display: flex;
+            align-items: end;
+            gap: 1px;
+            padding: 0 15px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+        
+        .equalizer-bars.active {
+            opacity: 1;
+        }
+        
+        .equalizer-bar {
+            flex: 1;
+            background: linear-gradient(to top, 
+                #dc143c 0%, 
+                #ff4757 25%, 
+                #ff6b6b 50%, 
+                #ff8e8e 75%, 
+                #ffaaaa 100%);
+            border-radius: 2px;
+            height: 2px;
+            transition: all 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            box-shadow: 
+                0 0 4px rgba(220, 20, 60, 0.4),
+                0 0 8px rgba(255, 107, 107, 0.2);
+            transform-origin: bottom;
+        }
+        
+        .equalizer-bar::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 3px;
+            background: radial-gradient(circle, #fff 0%, #ff6b6b 70%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+        
+        .equalizer-bar.peak::before {
+            opacity: 1;
+            animation: sparkle 0.3s ease-out;
+        }
+        
+        .equalizer-bar.wave-pulse {
+            animation: wavePulse 0.15s ease-out;
+        }
+        
+        @keyframes sparkle {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-50%) scale(0.5); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateX(-50%) scale(1.2); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateX(-50%) scale(0.8); 
+            }
+        }
+        
+        @keyframes wavePulse {
+            0% { 
+                transform: scaleY(1) scaleX(1);
+                box-shadow: 
+                    0 0 4px rgba(220, 20, 60, 0.4),
+                    0 0 8px rgba(255, 107, 107, 0.2);
+            }
+            50% { 
+                transform: scaleY(1.1) scaleX(1.05);
+                box-shadow: 
+                    0 0 8px rgba(220, 20, 60, 0.6),
+                    0 0 16px rgba(255, 107, 107, 0.4),
+                    0 0 24px rgba(255, 107, 107, 0.2);
+            }
+            100% { 
+                transform: scaleY(1) scaleX(1);
+                box-shadow: 
+                    0 0 4px rgba(220, 20, 60, 0.4),
+                    0 0 8px rgba(255, 107, 107, 0.2);
+            }
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid rgba(220, 20, 60, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
+            
+            /* Enhanced font support for Arabic and English */
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Amiri', 'Noto Sans Arabic', sans-serif;
+            line-height: 1.6;
+            
+            /* UTF-8 and bidirectional text support */
+            unicode-bidi: plaintext;
+            
+            /* Auto-direction support */
+            direction: auto;
+        }
+        
+        textarea.rtl-mode {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        textarea.ltr-mode {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: rgba(220, 20, 60, 0.6);
+            box-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
+        }
+        
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        button {
+            width: 65px;
+            height: 65px;
+            background: rgba(220, 20, 60, 0.2);
+            color: #ffffff;
+            border: 2px solid rgba(220, 20, 60, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 107, 107, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 50%;
+        }
+        
+        button:hover {
+            background: rgba(220, 20, 60, 0.4);
+            border-color: rgba(220, 20, 60, 0.8);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 
+                0 15px 30px rgba(220, 20, 60, 0.3),
+                0 0 25px rgba(255, 107, 107, 0.4);
+            color: #ff6b6b;
+        }
+        
+        button:hover::before {
+            opacity: 1;
+        }
+        
+        button:active {
+            transform: translateY(-1px) scale(1.05);
+        }
+        
+        button i {
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover i {
+            transform: scale(1.2);
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+        }
+        
+        /* Special styles for language switch button */
+        .lang-switch-btn {
+            font-size: 12px !important;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .lang-switch-btn:hover {
+            animation: rotateIcon 0.6s ease-in-out;
+        }
+        
+        /* Microphone button special effects */
+        button:has(.fa-microphone):hover {
+            animation: microphonePulse 1s ease-in-out infinite;
+        }
+        
+        button:has(.fa-stop):hover {
+            background: rgba(220, 20, 60, 0.6) !important;
+            animation: stopPulse 0.5s ease-in-out infinite alternate;
+        }
+        
+        /* Copy button special effects */
+        button:has(.fa-copy):hover {
+            animation: copyBounce 0.8s ease-in-out;
+        }
+        
+        /* Trash button special effects */
+        button:has(.fa-trash-alt):hover {
+            animation: trashShake 0.6s ease-in-out;
+        }
+        
+        @keyframes rotateIcon {
+            0% { transform: translateY(-3px) scale(1.1) rotateY(0deg); }
+            50% { transform: translateY(-3px) scale(1.1) rotateY(180deg); }
+            100% { transform: translateY(-3px) scale(1.1) rotateY(360deg); }
+        }
+        
+        @keyframes microphonePulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 15px 30px rgba(220, 20, 60, 0.3),
+                    0 0 25px rgba(255, 107, 107, 0.4);
+            }
+            50% { 
+                box-shadow: 
+                    0 15px 30px rgba(220, 20, 60, 0.5),
+                    0 0 35px rgba(255, 107, 107, 0.7);
+            }
+        }
+        
+        @keyframes stopPulse {
+            0% { transform: translateY(-3px) scale(1.1); }
+            100% { transform: translateY(-3px) scale(1.2); }
+        }
+        
+        @keyframes copyBounce {
+            0%, 100% { transform: translateY(-3px) scale(1.1); }
+            25% { transform: translateY(-5px) scale(1.15); }
+            50% { transform: translateY(-1px) scale(1.05); }
+            75% { transform: translateY(-4px) scale(1.12); }
+        }
+        
+        @keyframes trashShake {
+            0%, 100% { transform: translateY(-3px) scale(1.1) rotateZ(0deg); }
+            25% { transform: translateY(-3px) scale(1.1) rotateZ(-5deg); }
+            50% { transform: translateY(-3px) scale(1.1) rotateZ(5deg); }
+            75% { transform: translateY(-3px) scale(1.1) rotateZ(-3deg); }
+        }
+        
+        .output {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 25px;
+            min-height: 160px;
+            font-size: 36px;
+            font-weight: bold;
+            line-height: 1.8;
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            overflow: hidden;
+            position: relative;
+            
+            /* Enhanced font support for Arabic and English */
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Amiri', 'Noto Sans Arabic', sans-serif;
+            
+            /* UTF-8 and bidirectional text support */
+            unicode-bidi: plaintext;
+        }
+        
+        .output.rtl-output {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .output.ltr-output {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .word-glow {
+            display: inline-block;
+            animation: smoothWordAppear 1.2s ease-out;
+            text-shadow: 
+                0 0 8px rgba(255, 107, 107, 0.9),
+                0 0 16px rgba(255, 107, 107, 0.7),
+                0 0 24px rgba(255, 107, 107, 0.5),
+                0 0 32px rgba(220, 20, 60, 0.4);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .word-glow::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleGlow 2s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        .letter-shine {
+            display: inline-block;
+            position: relative;
+            animation: letterSparkle 0.6s ease-out;
+        }
+        
+        .letter-animate {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px) scale(0.8);
+            animation: smoothLetterAppear 0.6s ease-out forwards;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes smoothLetterAppear {
+            0% { 
+                opacity: 0; 
+                transform: translateY(15px) scale(0.8) rotateX(90deg);
+            }
+            30% { 
+                opacity: 0.5; 
+                transform: translateY(8px) scale(0.95) rotateX(45deg);
+            }
+            70% { 
+                opacity: 0.8; 
+                transform: translateY(-2px) scale(1.1) rotateX(0deg);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1) rotateX(0deg);
+            }
+        }
+        
+        .letter-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.8) 50%, transparent 70%);
+            opacity: 0;
+            animation: sparkleEffect 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes particleGlow {
+            0%, 100% { 
+                opacity: 0; 
+                transform: scale(0.8); 
+            }
+            50% { 
+                opacity: 0.6; 
+                transform: scale(1.2); 
+            }
+        }
+        
+        @keyframes letterSparkle {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.5) rotateX(90deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translateY(-5px) scale(1.1) rotateX(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+            }
+        }
+        
+        @keyframes sparkleEffect {
+            0%, 100% { opacity: 0; }
+            25% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            75% { opacity: 0.3; }
+        }
+        
+        @keyframes smoothWordAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.6) rotateX(45deg);
+                filter: blur(10px);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translateY(-8px) scale(1.05) rotateX(0deg);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+                filter: blur(0px);
+            }
+        }
+        
+        .word-glow:hover {
+            text-shadow: 
+                0 0 8px rgba(255, 107, 107, 1),
+                0 0 16px rgba(255, 107, 107, 0.8),
+                0 0 24px rgba(255, 107, 107, 0.6),
+                0 0 32px rgba(220, 20, 60, 0.5);
+            transform: scale(1.05);
+        }
+        
+        @keyframes wordGlow {
+            0% {
+                opacity: 0;
+                transform: translateY(10px) scale(0.8);
+                text-shadow: 0 0 0px rgba(255, 107, 107, 0);
+            }
+            50% {
+                opacity: 0.8;
+                text-shadow: 
+                    0 0 10px rgba(255, 107, 107, 1),
+                    0 0 20px rgba(255, 107, 107, 0.8),
+                    0 0 30px rgba(255, 107, 107, 0.6),
+                    0 0 40px rgba(220, 20, 60, 0.4);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                text-shadow: 
+                    0 0 5px rgba(255, 107, 107, 0.8),
+                    0 0 10px rgba(255, 107, 107, 0.6),
+                    0 0 15px rgba(255, 107, 107, 0.4),
+                    0 0 20px rgba(220, 20, 60, 0.3);
+            }
+        }
+        
+        .text-wave {
+            animation: textWave 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes textWave {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-2px); }
+        }
+        
+        @keyframes containerGlow {
+            0% {
+                box-shadow: 0 0 5px rgba(220, 20, 60, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 20px rgba(255, 107, 107, 0.6),
+                    0 0 30px rgba(220, 20, 60, 0.4),
+                    inset 0 0 20px rgba(255, 107, 107, 0.1);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(220, 20, 60, 0.3);
+            }
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0);
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.5);
+            }
+        }
+        
+        .status {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            max-width: 300px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .status.success {
+            background: rgba(220, 20, 60, 0.3);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 20, 60, 0.5);
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+        }
+        
+        .status.error {
+            background: rgba(180, 20, 40, 0.4);
+            color: #ffaaaa;
+            border: 1px solid rgba(180, 20, 40, 0.6);
+            box-shadow: 0 0 15px rgba(180, 20, 40, 0.4);
+        }
+        
+        .status.info {
+            background: rgba(220, 20, 60, 0.3);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 20, 60, 0.5);
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+        }
+        
+        .server-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            max-width: 280px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            display: none; /* Hidden but code preserved */
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.2);
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.online {
+            background: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+        
+        .status-indicator.offline {
+            background: #8b0000;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+        }
+        
+        .status-indicator.checking {
+            background: #dc143c;
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.5);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 20px;
+            }
+            
+            .logo {
+                max-width: 200px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .buttons {
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+            
+            button {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            .lang-switch-btn {
+                font-size: 11px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="particles-canvas" id="particlesCanvas"></canvas>
+    
+    <div class="container">
+        <div class="logo-container">
+            <img src="speech-translation-app/frontend/logo_horizontal.png" alt="Logo" class="logo">
+        </div>
+        
+        
+        <div class="input-group">
+            <div class="input-wrapper">
+                <textarea id="inputText" placeholder="Type your English text here..." 
+                          lang="en" dir="ltr" class="ltr-mode"
+                          aria-label="Text input field"></textarea>
+                <div class="equalizer-bars" id="equalizerBars">
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                    <div class="equalizer-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button onclick="startSpeechRecognition()" title="Use microphone to speak">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button onclick="switchLanguageDirection()" title="Switch translation direction" id="langSwitchBtn" class="lang-switch-btn">
+                EN→AR
+            </button>
+            <button onclick="clearAll()" title="Clear all text">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button onclick="copyResult()" title="Copy translation">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
+        
+        <div class="output rtl-output" id="outputText" lang="ar" dir="rtl">
+            <em style="opacity: 0.7; font-style: italic; direction: rtl; text-align: right; display: block;">
+                الترجمة العربية ستظهر هنا...
+            </em>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div class="server-status" id="serverStatus">
+            <span id="statusIndicator" class="status-indicator"></span>
+            <span id="statusText">Checking server...</span>
+        </div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isListening = false;
+        let translationTimeout = null;
+        let serverCheckInterval = null;
+        
+        // Language direction tracking
+        let currentDirection = 'en-ar'; // 'en-ar' or 'ar-en'
+        let isRTL = false; // Track if current input language is RTL
+        
+        // Audio context for sound effects
+        let audioContext = null;
+        let lastInputLength = 0;
+        let soundTimeout = null;
+        let typingFrequencies = [400, 500, 600, 700, 800, 900, 1000];
+        let lastFrequencyIndex = 0;
+        
+        // Initialize audio context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+        
+        // Enhanced typing sound with harmonics and reverb-like effect
+        function playTypingSound() {
+            try {
+                const context = initAudioContext();
+                
+                // Create multiple oscillators for richer sound
+                const mainOscillator = context.createOscillator();
+                const harmonic1 = context.createOscillator();
+                const harmonic2 = context.createOscillator();
+                
+                const mainGain = context.createGain();
+                const harmonic1Gain = context.createGain();
+                const harmonic2Gain = context.createGain();
+                const masterGain = context.createGain();
+                
+                // Get next frequency from progression
+                const baseFreq = typingFrequencies[lastFrequencyIndex];
+                lastFrequencyIndex = (lastFrequencyIndex + 1) % typingFrequencies.length;
+                
+                // Add some randomness for natural feel
+                const mainFreq = baseFreq + (Math.random() - 0.5) * 50;
+                const harm1Freq = mainFreq * 1.5 + (Math.random() - 0.5) * 30;
+                const harm2Freq = mainFreq * 2.2 + (Math.random() - 0.5) * 40;
+                
+                // Configure oscillators
+                mainOscillator.frequency.setValueAtTime(mainFreq, context.currentTime);
+                harmonic1.frequency.setValueAtTime(harm1Freq, context.currentTime);
+                harmonic2.frequency.setValueAtTime(harm2Freq, context.currentTime);
+                
+                // Use different waveforms for texture
+                mainOscillator.type = 'triangle';
+                harmonic1.type = 'sine';
+                harmonic2.type = 'sawtooth';
+                
+                // Connect nodes
+                mainOscillator.connect(mainGain);
+                harmonic1.connect(harmonic1Gain);
+                harmonic2.connect(harmonic2Gain);
+                
+                mainGain.connect(masterGain);
+                harmonic1Gain.connect(masterGain);
+                harmonic2Gain.connect(masterGain);
+                masterGain.connect(context.destination);
+                
+                // Envelope with quick attack and smooth decay
+                const now = context.currentTime;
+                const attackTime = 0.005;
+                const decayTime = 0.08;
+                const releaseTime = 0.02;
+                
+                // Main oscillator (loudest)
+                mainGain.gain.setValueAtTime(0, now);
+                mainGain.gain.linearRampToValueAtTime(0.12, now + attackTime);
+                mainGain.gain.exponentialRampToValueAtTime(0.08, now + attackTime + decayTime);
+                mainGain.gain.exponentialRampToValueAtTime(0.001, now + attackTime + decayTime + releaseTime);
+                
+                // First harmonic (medium)
+                harmonic1Gain.gain.setValueAtTime(0, now);
+                harmonic1Gain.gain.linearRampToValueAtTime(0.06, now + attackTime);
+                harmonic1Gain.gain.exponentialRampToValueAtTime(0.04, now + attackTime + decayTime);
+                harmonic1Gain.gain.exponentialRampToValueAtTime(0.001, now + attackTime + decayTime + releaseTime);
+                
+                // Second harmonic (subtle)
+                harmonic2Gain.gain.setValueAtTime(0, now);
+                harmonic2Gain.gain.linearRampToValueAtTime(0.03, now + attackTime);
+                harmonic2Gain.gain.exponentialRampToValueAtTime(0.02, now + attackTime + decayTime);
+                harmonic2Gain.gain.exponentialRampToValueAtTime(0.001, now + attackTime + decayTime + releaseTime);
+                
+                // Start and stop oscillators
+                const duration = attackTime + decayTime + releaseTime;
+                mainOscillator.start(now);
+                harmonic1.start(now);
+                harmonic2.start(now);
+                
+                mainOscillator.stop(now + duration);
+                harmonic1.stop(now + duration);
+                harmonic2.stop(now + duration);
+                
+            } catch (error) {
+                console.log('[AUDIO] Enhanced typing sound not available');
+            }
+        }
+        
+        // Enhanced voice recognition sound with swoosh effect
+        function playVoiceRecognitionSound() {
+            try {
+                const context = initAudioContext();
+                const oscillator = context.createOscillator();
+                const filter = context.createBiquadFilter();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                // Configure filter for sweeping effect
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(400, context.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(1200, context.currentTime + 0.15);
+                filter.Q.setValueAtTime(8, context.currentTime);
+                
+                // Create swoosh frequency sweep
+                oscillator.frequency.setValueAtTime(300, context.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(800, context.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(400, context.currentTime + 0.15);
+                oscillator.type = 'sawtooth';
+                
+                // Envelope
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.08, context.currentTime + 0.02);
+                gainNode.gain.linearRampToValueAtTime(0.06, context.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.15);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.15);
+            } catch (error) {
+                console.log('[AUDIO] Voice recognition sound not available');
+            }
+        }
+        
+        // Professional translation completion sound
+        function playTranslationCompleteSound() {
+            try {
+                const context = initAudioContext();
+                
+                // Create a pleasant chord progression
+                const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+                const oscillators = [];
+                const gains = [];
+                
+                frequencies.forEach((freq, index) => {
+                    const osc = context.createOscillator();
+                    const gain = context.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(context.destination);
+                    
+                    osc.frequency.setValueAtTime(freq, context.currentTime);
+                    osc.type = 'sine';
+                    
+                    // Stagger the chord notes slightly
+                    const startTime = context.currentTime + index * 0.05;
+                    const duration = 0.4 - index * 0.05;
+                    
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.03, startTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.015, startTime + 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                });
+                
+            } catch (error) {
+                console.log('[AUDIO] Translation complete sound not available');
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            // Send status to console instead of displaying
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // Keep the original display code but hide it
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'none'; // Always hidden
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        async function checkServerStatus() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            // Log to console instead of showing UI
+            console.log('[SERVER] Checking server status...');
+            indicator.className = 'status-indicator checking';
+            statusText.textContent = 'Checking server...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/health', {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    console.log('[SERVER] Server online');
+                    indicator.className = 'status-indicator online';
+                    statusText.textContent = 'Server online';
+                } else {
+                    console.log('[SERVER] Server error');
+                    indicator.className = 'status-indicator offline';
+                    statusText.textContent = 'Server error';
+                }
+            } catch (error) {
+                console.log('[SERVER] Server offline');
+                indicator.className = 'status-indicator offline';
+                statusText.textContent = 'Server offline';
+            }
+        }
+
+        function switchLanguageDirection() {
+            // Play a switch sound effect
+            try {
+                const context = initAudioContext();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                // Create a switch/toggle sound (two-tone beep)
+                oscillator.frequency.setValueAtTime(700, context.currentTime);
+                oscillator.frequency.setValueAtTime(500, context.currentTime + 0.1);
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.06, context.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0.06, context.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.2);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.2);
+            } catch (error) {
+                console.log('[AUDIO] Switch sound not available');
+            }
+            
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const langSwitchBtn = document.getElementById('langSwitchBtn');
+            
+            if (currentDirection === 'en-ar') {
+                // Switch to Arabic to English
+                currentDirection = 'ar-en';
+                isRTL = true;
+                
+                // Update input field for Arabic input
+                langSwitchBtn.textContent = 'AR→EN';
+                langSwitchBtn.title = 'Switch to English → Arabic';
+                inputText.placeholder = 'اكتب النص العربي هنا...';
+                inputText.dir = 'rtl';
+                inputText.lang = 'ar';
+                inputText.classList.add('rtl-mode');
+                inputText.classList.remove('ltr-mode');
+                
+                // Update output field for English output
+                outputText.dir = 'ltr';
+                outputText.lang = 'en';
+                outputText.classList.add('ltr-output');
+                outputText.classList.remove('rtl-output');
+                outputText.innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: left; display: block;">English translation will appear here...</em>';
+                
+                console.log('[LANG] Switched to Arabic → English');
+                
+            } else {
+                // Switch to English to Arabic
+                currentDirection = 'en-ar';
+                isRTL = false;
+                
+                // Update input field for English input
+                langSwitchBtn.textContent = 'EN→AR';
+                langSwitchBtn.title = 'Switch to Arabic → English';
+                inputText.placeholder = 'Type your English text here...';
+                inputText.dir = 'ltr';
+                inputText.lang = 'en';
+                inputText.classList.add('ltr-mode');
+                inputText.classList.remove('rtl-mode');
+                
+                // Update output field for Arabic output
+                outputText.dir = 'rtl';
+                outputText.lang = 'ar';
+                outputText.classList.add('rtl-output');
+                outputText.classList.remove('ltr-output');
+                outputText.innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: rtl; text-align: right; display: block;">الترجمة العربية ستظهر هنا...</em>';
+                
+                console.log('[LANG] Switched to English → Arabic');
+            }
+            
+            // Clear input and trigger translation if there's text
+            const currentText = inputText.value;
+            inputText.value = '';
+            if (currentText.trim()) {
+                inputText.value = currentText;
+                autoTranslate();
+            }
+        }
+
+        // Function to animate translation text with smooth letter and word effects
+        function animateTranslationText(text, outputElement) {
+            const words = text.split(' ');
+            outputElement.innerHTML = '';
+            outputElement.style.opacity = '0';
+            
+            // Fade in the container first
+            setTimeout(() => {
+                outputElement.style.transition = 'opacity 0.5s ease';
+                outputElement.style.opacity = '1';
+            }, 100);
+            
+            words.forEach((word, wordIndex) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word-glow';
+                wordSpan.style.animationDelay = `${wordIndex * 0.2}s`;
+                
+                // Create letter-by-letter animation within each word
+                const letters = word.split('');
+                letters.forEach((letter, letterIndex) => {
+                    const letterSpan = document.createElement('span');
+                    letterSpan.textContent = letter;
+                    letterSpan.className = 'letter-animate';
+                    letterSpan.style.animationDelay = `${(wordIndex * 0.2) + (letterIndex * 0.05)}s`;
+                    
+                    // Add subtle letter glow effect
+                    setTimeout(() => {
+                        letterSpan.style.textShadow = `
+                            0 0 4px rgba(255, 107, 107, 0.6),
+                            0 0 8px rgba(255, 107, 107, 0.4)
+                        `;
+                    }, (wordIndex * 200) + (letterIndex * 50) + 300);
+                    
+                    wordSpan.appendChild(letterSpan);
+                });
+                
+                outputElement.appendChild(wordSpan);
+                
+                // Add space between words (except for the last word)
+                if (wordIndex < words.length - 1) {
+                    const spaceSpan = document.createElement('span');
+                    spaceSpan.textContent = ' ';
+                    spaceSpan.style.opacity = '0';
+                    spaceSpan.style.animation = `smoothLetterAppear 0.3s ease-out ${(wordIndex * 0.2) + 0.1}s forwards`;
+                    outputElement.appendChild(spaceSpan);
+                }
+            });
+            
+            // Add final glow effect to the entire text
+            setTimeout(() => {
+                outputElement.style.animation = 'smoothGlow 3s ease-in-out infinite';
+            }, words.length * 200 + 500);
+        }
+        
+        // Enhanced Equalizer animation functions
+        let equalizerInterval = null;
+        let equalizerParticles = [];
+        let equalizerCanvas = null;
+        let equalizerCtx = null;
+        
+        // Initialize equalizer particle system
+        function initEqualizerParticles() {
+            if (!equalizerCanvas) {
+                equalizerCanvas = document.createElement('canvas');
+                equalizerCanvas.style.position = 'absolute';
+                equalizerCanvas.style.top = '0';
+                equalizerCanvas.style.left = '0';
+                equalizerCanvas.style.width = '100%';
+                equalizerCanvas.style.height = '100%';
+                equalizerCanvas.style.pointerEvents = 'none';
+                equalizerCanvas.style.zIndex = '15';
+                
+                const inputWrapper = document.querySelector('.input-wrapper');
+                inputWrapper.appendChild(equalizerCanvas);
+                
+                equalizerCtx = equalizerCanvas.getContext('2d');
+                resizeEqualizerCanvas();
+                
+                window.addEventListener('resize', resizeEqualizerCanvas);
+            }
+        }
+        
+        function resizeEqualizerCanvas() {
+            if (equalizerCanvas) {
+                const wrapper = document.querySelector('.input-wrapper');
+                const rect = wrapper.getBoundingClientRect();
+                equalizerCanvas.width = rect.width;
+                equalizerCanvas.height = rect.height;
+            }
+        }
+        
+        function createEqualizerParticle(x, y, intensity) {
+            return {
+                x: x,
+                y: y,
+                size: Math.random() * 2 + 0.5,
+                speedX: (Math.random() - 0.5) * 1.5,
+                speedY: -Math.random() * 4 - 2,
+                life: 1.0,
+                decay: 0.015 + Math.random() * 0.015,
+                intensity: intensity,
+                angle: Math.random() * Math.PI * 2,
+                spin: (Math.random() - 0.5) * 0.2,
+                pulse: Math.random() * Math.PI * 2,
+                trail: []
+            };
+        }
+        
+        function updateEqualizerParticles() {
+            if (!equalizerCtx || !equalizerCanvas) return;
+            
+            equalizerCtx.clearRect(0, 0, equalizerCanvas.width, equalizerCanvas.height);
+            
+            // Update and draw particles
+            for (let i = equalizerParticles.length - 1; i >= 0; i--) {
+                const particle = equalizerParticles[i];
+                
+                // Add current position to trail
+                particle.trail.push({ x: particle.x, y: particle.y, life: particle.life });
+                if (particle.trail.length > 8) {
+                    particle.trail.shift();
+                }
+                
+                // Update physics
+                particle.x += particle.speedX;
+                particle.y += particle.speedY;
+                particle.speedY += 0.1; // gravity
+                particle.speedX *= 0.98; // air resistance
+                particle.life -= particle.decay;
+                particle.angle += particle.spin;
+                particle.pulse += 0.3;
+                
+                // Remove dead particles
+                if (particle.life <= 0) {
+                    equalizerParticles.splice(i, 1);
+                    continue;
+                }
+                
+                // Draw particle trail
+                equalizerCtx.save();
+                for (let t = 0; t < particle.trail.length; t++) {
+                    const trailPoint = particle.trail[t];
+                    const trailAlpha = (t / particle.trail.length) * particle.life * 0.3;
+                    const trailSize = particle.size * (t / particle.trail.length) * 0.5;
+                    
+                    if (trailAlpha > 0.01) {
+                        equalizerCtx.globalAlpha = trailAlpha;
+                        
+                        // Create gradient for trail
+                        const gradient = equalizerCtx.createRadialGradient(
+                            trailPoint.x, trailPoint.y, 0,
+                            trailPoint.x, trailPoint.y, trailSize * 3
+                        );
+                        gradient.addColorStop(0, '#ff6b6b');
+                        gradient.addColorStop(0.5, '#dc143c');
+                        gradient.addColorStop(1, 'transparent');
+                        
+                        equalizerCtx.fillStyle = gradient;
+                        equalizerCtx.beginPath();
+                        equalizerCtx.arc(trailPoint.x, trailPoint.y, trailSize * 3, 0, Math.PI * 2);
+                        equalizerCtx.fill();
+                    }
+                }
+                equalizerCtx.restore();
+                
+                // Draw main particle with enhanced effects
+                const alpha = particle.life * particle.intensity;
+                const pulseSize = 1 + Math.sin(particle.pulse) * 0.3;
+                
+                equalizerCtx.save();
+                equalizerCtx.globalAlpha = alpha;
+                
+                // Outer glow (largest)
+                const outerGradient = equalizerCtx.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, particle.size * 6 * pulseSize
+                );
+                outerGradient.addColorStop(0, 'rgba(255, 107, 107, 0.8)');
+                outerGradient.addColorStop(0.3, 'rgba(220, 20, 60, 0.6)');
+                outerGradient.addColorStop(0.7, 'rgba(139, 0, 0, 0.3)');
+                outerGradient.addColorStop(1, 'transparent');
+                
+                equalizerCtx.fillStyle = outerGradient;
+                equalizerCtx.beginPath();
+                equalizerCtx.arc(particle.x, particle.y, particle.size * 6 * pulseSize, 0, Math.PI * 2);
+                equalizerCtx.fill();
+                
+                // Middle glow
+                const middleGradient = equalizerCtx.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, particle.size * 3 * pulseSize
+                );
+                middleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                middleGradient.addColorStop(0.4, 'rgba(255, 107, 107, 0.8)');
+                middleGradient.addColorStop(1, 'transparent');
+                
+                equalizerCtx.fillStyle = middleGradient;
+                equalizerCtx.beginPath();
+                equalizerCtx.arc(particle.x, particle.y, particle.size * 3 * pulseSize, 0, Math.PI * 2);
+                equalizerCtx.fill();
+                
+                // Core particle (rotating)
+                equalizerCtx.translate(particle.x, particle.y);
+                equalizerCtx.rotate(particle.angle);
+                
+                const coreGradient = equalizerCtx.createRadialGradient(0, 0, 0, 0, 0, particle.size * pulseSize);
+                coreGradient.addColorStop(0, '#ffffff');
+                coreGradient.addColorStop(0.7, '#ff6b6b');
+                coreGradient.addColorStop(1, '#dc143c');
+                
+                equalizerCtx.fillStyle = coreGradient;
+                equalizerCtx.beginPath();
+                equalizerCtx.arc(0, 0, particle.size * pulseSize, 0, Math.PI * 2);
+                equalizerCtx.fill();
+                
+                // Add sparkle effect
+                if (Math.random() > 0.95) {
+                    equalizerCtx.fillStyle = '#ffffff';
+                    equalizerCtx.beginPath();
+                    equalizerCtx.arc(0, 0, particle.size * 0.3, 0, Math.PI * 2);
+                    equalizerCtx.fill();
+                }
+                
+                equalizerCtx.restore();
+            }
+        }
+        
+        function startEqualizer() {
+            const equalizerBars = document.getElementById('equalizerBars');
+            if (!equalizerBars) return;
+            
+            // Remove particle initialization
+            // initEqualizerParticles();
+            equalizerBars.classList.add('active');
+            
+            // Stop any existing animation
+            if (equalizerInterval) {
+                clearInterval(equalizerInterval);
+            }
+            
+            equalizerInterval = setInterval(() => {
+                const bars = equalizerBars.querySelectorAll('.equalizer-bar');
+                // Remove particle-related code
+                // const barRect = equalizerBars.getBoundingClientRect();
+                // const wrapperRect = document.querySelector('.input-wrapper').getBoundingClientRect();
+                
+                bars.forEach((bar, index) => {
+                    // Create realistic audio-reactive heights with frequency bands
+                    const baseHeight = 2;
+                    const maxHeight = 25;
+                    
+                    // Simulate different frequency responses
+                    let frequencyMultiplier;
+                    if (index < 3) {
+                        // Low frequencies - more stable, higher amplitude
+                        frequencyMultiplier = 0.7 + Math.random() * 0.6;
+                    } else if (index < 8) {
+                        // Mid frequencies - most active
+                        frequencyMultiplier = 0.8 + Math.random() * 0.8;
+                    } else {
+                        // High frequencies - more erratic, lower amplitude
+                        frequencyMultiplier = 0.3 + Math.random() * 0.7;
+                    }
+                    
+                    const targetHeight = baseHeight + (maxHeight * frequencyMultiplier);
+                    
+                    // Add correlation with neighboring bars for wave effect
+                    const prevBar = bars[index - 1];
+                    const nextBar = bars[index + 1];
+                    let smoothedHeight = targetHeight;
+                    
+                    if (prevBar && nextBar) {
+                        const prevHeight = parseInt(prevBar.style.height) || baseHeight;
+                        const nextHeight = parseInt(nextBar.style.height) || baseHeight;
+                        smoothedHeight = (targetHeight + prevHeight * 0.3 + nextHeight * 0.3) / 1.6;
+                    }
+                    
+                    const finalHeight = Math.max(baseHeight, Math.min(maxHeight, smoothedHeight));
+                    bar.style.height = finalHeight + 'px';
+                    
+                    // Add visual effects for peaks
+                    const intensity = (finalHeight - baseHeight) / (maxHeight - baseHeight);
+                    if (intensity > 0.8) {
+                        bar.classList.add('peak');
+                        setTimeout(() => bar.classList.remove('peak'), 200);
+                    }
+                    
+                    if (intensity > 0.6) {
+                        bar.classList.add('wave-pulse');
+                        setTimeout(() => bar.classList.remove('wave-pulse'), 150);
+                    }
+                    
+                    // Removed particle creation code
+                    
+                    // Add slight delay for wave effect
+                    bar.style.transitionDelay = `${index * 5}ms`;
+                });
+                
+                // Removed particle animation
+                // updateEqualizerParticles();
+                
+            }, 60); // Update every 60ms for smooth 16fps animation
+        }
+        
+        function stopEqualizer() {
+            const equalizerBars = document.getElementById('equalizerBars');
+            if (!equalizerBars) return;
+            
+            if (equalizerInterval) {
+                clearInterval(equalizerInterval);
+                equalizerInterval = null;
+            }
+            
+            // Gradually fade out the bars with wave effect
+            const bars = equalizerBars.querySelectorAll('.equalizer-bar');
+            bars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.height = '2px';
+                    bar.classList.remove('peak', 'wave-pulse');
+                }, index * 25);
+            });
+            
+            // Removed particle animation code
+            
+            // Hide equalizer after all bars are down
+            setTimeout(() => {
+                equalizerBars.classList.remove('active');
+            }, bars.length * 25 + 300);
+        }
+        
+        function pulseEqualizer() {
+            const equalizerBars = document.getElementById('equalizerBars');
+            if (!equalizerBars) return;
+            
+            // Remove particle initialization
+            // initEqualizerParticles();
+            equalizerBars.classList.add('active');
+            
+            const bars = equalizerBars.querySelectorAll('.equalizer-bar');
+            // Remove particle-related code
+            // const wrapperRect = document.querySelector('.input-wrapper').getBoundingClientRect();
+            
+            bars.forEach((bar, index) => {
+                // Create pulse wave that radiates from center
+                const centerIndex = Math.floor(bars.length / 2);
+                const distance = Math.abs(index - centerIndex);
+                const delay = distance * 15;
+                
+                setTimeout(() => {
+                    const height = 8 + Math.random() * 12;
+                    bar.style.height = height + 'px';
+                    bar.classList.add('wave-pulse', 'peak');
+                    
+                    // Removed particle creation code
+                }, delay);
+            });
+            
+            // Removed particle animation code
+            
+            setTimeout(() => {
+                bars.forEach((bar, index) => {
+                    const centerIndex = Math.floor(bars.length / 2);
+                    const distance = Math.abs(index - centerIndex);
+                    const delay = distance * 15;
+                    
+                    setTimeout(() => {
+                        bar.style.height = '2px';
+                        bar.classList.remove('wave-pulse', 'peak');
+                    }, delay);
+                });
+                
+                setTimeout(() => {
+                    // Removed particle cleanup code
+                    equalizerBars.classList.remove('active');
+                }, bars.length * 15 + 400);
+            }, 400);
+        }
+
+        function autoTranslate() {
+            const input = document.getElementById('inputText').value.trim();
+            const output = document.getElementById('outputText');
+            
+            // Clear previous timeout
+            if (translationTimeout) {
+                clearTimeout(translationTimeout);
+            }
+            
+            if (!input) {
+                if (currentDirection === 'en-ar') {
+                    output.innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">Arabic translation will appear here...</em>';
+                } else {
+                    output.innerHTML = '<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">English translation will appear here...</em>';
+                }
+                return;
+            }
+            
+            // Show translating status
+            showStatus(`Translating ${currentDirection === 'en-ar' ? 'English to Arabic' : 'Arabic to English'} with stunning effects...`, 'info');
+            
+            // Delay translation to avoid too many API calls while typing
+            translationTimeout = setTimeout(async () => {
+                try {
+                    const sourceLang = currentDirection === 'en-ar' ? 'en' : 'ar';
+                    const targetLang = currentDirection === 'en-ar' ? 'ar' : 'en';
+                    
+                    const response = await fetch('http://localhost:8080/api/translate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: input,
+                            sourceLang: sourceLang,
+                            targetLang: targetLang
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        const translation = result.translatedText || result.translation;
+                        if (translation) {
+                            // Play translation completion sound
+                            playTranslationCompleteSound();
+                            
+                            // Use animated text display
+                            animateTranslationText(translation, output);
+                            showStatus('Translation completed with stunning effects!', 'success');
+                        } else {
+                            output.innerHTML = 'Translation not available';
+                            showStatus('Translation failed', 'error');
+                        }
+                    } else {
+                        output.innerHTML = 'Server error occurred';
+                        showStatus('Server error', 'error');
+                    }
+                } catch (error) {
+                    console.error('Translation error:', error);
+                    output.innerHTML = 'Connection error - Server is offline. Please wait for server to restart.';
+                    showStatus('Server connection failed', 'error');
+                    
+                    // Trigger immediate server status check
+                    checkServerStatus();
+                }
+            }, 500); // Wait 500ms after user stops typing
+        }
+
+        function startSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showStatus('Speech recognition not supported. Try typing instead or use Windows Voice Typing (Win+H)', 'error');
+                return;
+            }
+            
+            if (isListening) {
+                stopSpeechRecognition();
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            // Set language based on current direction
+            recognition.lang = currentDirection === 'en-ar' ? 'en-US' : 'ar-SA';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                isListening = true;
+                const langName = currentDirection === 'en-ar' ? 'English' : 'Arabic';
+                showStatus(`Listening for ${langName} with magic... Speak now!`, 'info');
+                document.querySelector('button[onclick="startSpeechRecognition()"]').innerHTML = '<i class="fas fa-stop"></i>';
+                
+                // Start equalizer animation during listening
+                startEqualizer();
+            };
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                
+                // Play voice recognition completion sound
+                playVoiceRecognitionSound();
+                
+                // Stop equalizer and show completion pulse
+                stopEqualizer();
+                setTimeout(() => {
+                    pulseEqualizer();
+                }, 300);
+                
+                // Update input and last length tracker
+                document.getElementById('inputText').value = transcript;
+                lastInputLength = transcript.length;
+                
+                showStatus(`Captured with sparkle: "${transcript}"`, 'success');
+                autoTranslate(); // Automatically translate the captured speech
+            };
+            
+            recognition.onerror = function(event) {
+                showStatus('Speech recognition error. Try Windows Voice Typing (Win+H) instead', 'error');
+                stopSpeechRecognition();
+            };
+            
+            recognition.onend = function() {
+                stopSpeechRecognition();
+            };
+            
+            recognition.start();
+        }
+
+        function stopSpeechRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isListening = false;
+            document.querySelector('button[onclick="startSpeechRecognition()"]').innerHTML = '<i class="fas fa-microphone"></i>';
+            
+            // Stop equalizer when speech recognition ends
+            stopEqualizer();
+            
+            if (document.getElementById('status').textContent.includes('Listening')) {
+                showStatus('Voice input stopped with grace', 'info');
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            const placeholder = currentDirection === 'en-ar' ? 
+                'Arabic translation will appear here...' : 
+                'English translation will appear here...';
+            document.getElementById('outputText').innerHTML = `<em style="opacity: 0.7; font-style: italic; direction: ltr; text-align: center; display: block;">${placeholder}</em>`;
+            document.getElementById('status').style.display = 'none';
+            showStatus('All text cleared with style!', 'success');
+        }
+
+        function copyResult() {
+            const output = document.getElementById('outputText');
+            const text = output.textContent || output.innerText;
+            
+            if (!text || text.includes('translation will appear here')) {
+                showStatus('No translation to copy', 'error');
+                return;
+            }
+            
+            const langName = currentDirection === 'en-ar' ? 'Arabic' : 'English';
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus(`${langName} text copied to clipboard with sparkle!`, 'success');
+            }).catch(() => {
+                showStatus('Could not copy text', 'error');
+            });
+        }
+
+        // Add automatic translation on input with enhanced sound effects
+        document.getElementById('inputText').addEventListener('input', function(e) {
+            const currentLength = e.target.value.length;
+            
+            // Play enhanced sound effect when text is being added (not deleted)
+            if (currentLength > lastInputLength) {
+                // Clear any existing sound timeout to prevent audio spam
+                if (soundTimeout) {
+                    clearTimeout(soundTimeout);
+                }
+                
+                // Play typing sound with intelligent timing
+                soundTimeout = setTimeout(() => {
+                    // Higher chance for sound on word boundaries and longer pauses
+                    const timeSinceLastSound = Date.now() - (window.lastSoundTime || 0);
+                    const shouldPlaySound = Math.random() > 0.2 || timeSinceLastSound > 200;
+                    
+                    if (shouldPlaySound) {
+                        playTypingSound();
+                        window.lastSoundTime = Date.now();
+                    }
+                }, 15);
+                
+                // Enhanced equalizer pulse when typing
+                if (Math.random() > 0.5) { // 50% chance for more natural feel
+                    pulseEqualizer();
+                }
+            }
+            
+            // Start continuous equalizer when there's text, stop when empty
+            if (currentLength > 0 && lastInputLength === 0) {
+                startEqualizer();
+            } else if (currentLength === 0 && lastInputLength > 0) {
+                stopEqualizer();
+            }
+            
+            // Update last input length
+            lastInputLength = currentLength;
+            
+            // Call the original autoTranslate function
+            autoTranslate();
+        });
+        
+        // Handle Enter key for manual translation trigger (optional)
+        document.getElementById('inputText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                autoTranslate();
+            }
+        });
+
+        // Auto-focus on input
+        document.getElementById('inputText').focus();
+        
+        // Initialize audio context on first user interaction
+        document.addEventListener('click', function initAudio() {
+            initAudioContext();
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+        
+        document.addEventListener('keydown', function initAudio() {
+            initAudioContext();
+            document.removeEventListener('keydown', initAudio);
+        }, { once: true });
+        
+        // Initialize server status checking
+        checkServerStatus();
+        
+        // Check server status every 30 seconds
+        serverCheckInterval = setInterval(checkServerStatus, 30000);
+        
+        // Enhanced Sound Wave Particles Animation
+        class SoundWaveParticles {
+            constructor() {
+                this.canvas = document.getElementById('particlesCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.waves = [];
+                this.time = 0;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                
+                this.resize();
+                this.init();
+                this.animate();
+                
+                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('mousemove', (e) => {
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                });
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+            }
+            
+            init() {
+                // Create floating particles with variety
+                for (let i = 0; i < 80; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        size: Math.random() * 2 + 0.5,
+                        speedX: (Math.random() - 0.5) * 0.8,
+                        speedY: (Math.random() - 0.5) * 0.8,
+                        opacity: Math.random() * 0.4 + 0.1,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: 0.02 + Math.random() * 0.03,
+                        type: Math.random() > 0.7 ? 'glow' : 'normal'
+                    });
+                }
+                
+                // Create enhanced sound waves
+                for (let i = 0; i < 5; i++) {
+                    this.waves.push({
+                        centerX: Math.random() * this.width,
+                        centerY: Math.random() * this.height,
+                        radius: 0,
+                        maxRadius: Math.random() * 300 + 150,
+                        speed: Math.random() * 1.5 + 0.8,
+                        opacity: 0.6,
+                        frequency: Math.random() * 0.015 + 0.008,
+                        phase: Math.random() * Math.PI * 2,
+                        waveCount: Math.floor(Math.random() * 3) + 2
+                    });
+                }
+            }
+            
+            drawParticles() {
+                this.particles.forEach(particle => {
+                    // Update position with subtle drift
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    particle.pulse += particle.pulseSpeed;
+                    
+                    // Mouse interaction - subtle attraction
+                    const dx = this.mouseX - particle.x;
+                    const dy = this.mouseY - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) {
+                        const force = (150 - distance) / 150 * 0.02;
+                        particle.x += dx * force * 0.1;
+                        particle.y += dy * force * 0.1;
+                    }
+                    
+                    // Wrap around screen
+                    if (particle.x < 0) particle.x = this.width;
+                    if (particle.x > this.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = this.height;
+                    if (particle.y > this.height) particle.y = 0;
+                    
+                    // Calculate pulsing opacity
+                    const pulseOpacity = particle.opacity * (0.7 + Math.sin(particle.pulse) * 0.3);
+                    
+                    if (particle.type === 'glow') {
+                        // Enhanced glow particles
+                        const gradient = this.ctx.createRadialGradient(
+                            particle.x, particle.y, 0,
+                            particle.x, particle.y, particle.size * 8
+                        );
+                        gradient.addColorStop(0, `rgba(255, 107, 107, ${pulseOpacity})`);
+                        gradient.addColorStop(0.5, `rgba(220, 20, 60, ${pulseOpacity * 0.6})`);
+                        gradient.addColorStop(1, 'transparent');
+                        
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, particle.size * 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Core
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${pulseOpacity})`;
+                        this.ctx.fill();
+                    } else {
+                        // Normal particles
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(220, 20, 60, ${pulseOpacity})`;
+                        this.ctx.fill();
+                    }
+                });
+            }
+            
+            drawWaves() {
+                this.waves.forEach(wave => {
+                    // Update wave
+                    wave.radius += wave.speed;
+                    if (wave.radius > wave.maxRadius) {
+                        wave.radius = 0;
+                        wave.centerX = Math.random() * this.width;
+                        wave.centerY = Math.random() * this.height;
+                        wave.phase = Math.random() * Math.PI * 2;
+                    }
+                    
+                    // Calculate opacity based on radius
+                    const radiusRatio = wave.radius / wave.maxRadius;
+                    const currentOpacity = wave.opacity * (1 - radiusRatio * 0.8);
+                    
+                    // Draw multiple concentric wave rings
+                    for (let ring = 0; ring < wave.waveCount; ring++) {
+                        const ringRadius = wave.radius - (ring * 30);
+                        if (ringRadius > 0) {
+                            const ringOpacity = currentOpacity * (1 - ring * 0.2);
+                            
+                            this.ctx.beginPath();
+                            this.ctx.arc(wave.centerX, wave.centerY, ringRadius, 0, Math.PI * 2);
+                            this.ctx.strokeStyle = `rgba(220, 20, 60, ${ringOpacity})`;
+                            this.ctx.lineWidth = 1 + ring * 0.5;
+                            this.ctx.stroke();
+                        }
+                    }
+                    
+                    // Draw enhanced sound wave pattern
+                    this.drawSoundWave(wave.centerX, wave.centerY, wave.radius, currentOpacity, wave.phase);
+                });
+            }
+            
+            drawSoundWave(centerX, centerY, radius, opacity, phase) {
+                const points = 72;
+                const angleStep = (Math.PI * 2) / points;
+                
+                this.ctx.beginPath();
+                for (let i = 0; i <= points; i++) {
+                    const angle = i * angleStep;
+                    const waveAmplitude = Math.sin(this.time * 0.02 + radius * 0.008 + phase) * 12;
+                    const secondaryWave = Math.sin(this.time * 0.04 + angle * 3) * 4;
+                    const x = centerX + Math.cos(angle) * (radius + waveAmplitude + secondaryWave);
+                    const y = centerY + Math.sin(angle) * (radius + waveAmplitude + secondaryWave);
+                    
+                    if (i === 0) {
+                        this.ctx.moveTo(x, y);
+                    } else {
+                        this.ctx.lineTo(x, y);
+                    }
+                }
+                this.ctx.strokeStyle = `rgba(255, 107, 107, ${opacity * 0.4})`;
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+            }
+            
+            drawConnections() {
+                // Connect nearby particles with enhanced lines
+                for (let i = 0; i < this.particles.length; i++) {
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const dx = this.particles[i].x - this.particles[j].x;
+                        const dy = this.particles[i].y - this.particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 120) {
+                            const opacity = (120 - distance) / 120 * 0.15;
+                            
+                            // Create gradient line
+                            const gradient = this.ctx.createLinearGradient(
+                                this.particles[i].x, this.particles[i].y,
+                                this.particles[j].x, this.particles[j].y
+                            );
+                            gradient.addColorStop(0, `rgba(220, 20, 60, ${opacity})`);
+                            gradient.addColorStop(0.5, `rgba(255, 107, 107, ${opacity * 1.5})`);
+                            gradient.addColorStop(1, `rgba(220, 20, 60, ${opacity})`);
+                            
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                            this.ctx.strokeStyle = gradient;
+                            this.ctx.lineWidth = 1;
+                            this.ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            animate() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                this.time++;
+                
+                this.drawParticles();
+                this.drawWaves();
+                this.drawConnections();
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // Initialize particles when page loads
+        window.addEventListener('load', () => {
+            new SoundWaveParticles();
+        });
+    </script>
+</body>
+</html>
